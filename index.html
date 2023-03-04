@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+	<head>
+		<title>aaa</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,maximum-scale=1"/>
+		
+		<style>
+			body { margin: 0; padding: 0; height: 100%; position: relative; top: 0; left: 0; background: #000; font-family: sans-serif; }
+			.bg {
+				border-radius: 30px;
+				margin: 0; 
+				padding: 0; 
+				width: 96%;
+				height: 84%;
+				overflow: hidden;
+				position: fixed; top: 2%; left: 2%; 
+				background: #F17C58 linear-gradient(45deg, #F17C58, #E94584, #24AADB, #27DBB1, #FFDC18, #FF3706);
+				background-size: 600% 100%;
+				animation: bbgrd 16s linear infinite;
+				animation-direction: alternate;
+			}
+			@keyframes bbgrd {
+				0% { background-position: 0%; }
+				100% { background-position: 100%; }
+			}
+
+			#name {
+				display: block;
+				margin: 0 0 0 16px;
+				opacity: 0.4; 
+				font-size: 72px;
+				font-weight: bold;
+			}
+
+			#horse { 
+				position: fixed; top: 50%; left: 50%;
+				transform: translate(-20%,-50%);
+				opacity: 0;
+				transition: opacity 0.4s, left 9s;
+			}
+			#horse.horse-show {
+				opacity: 1; 
+			}
+			#horse.horse-hide {
+				opacity: 0; 
+			}
+
+			#win {
+				position: fixed; top: 50%; left: 50%;
+				transform: translate(-50%,-50%);
+				border-radius: 50%;
+				background: red;
+				color: #fff;
+				font-size: 90px;
+				text-align: center;
+				width: 260px; height: 260px;
+				line-height: 260px;
+				opacity: 0;
+				transition: opacity 0.4s, left 9s;
+			}
+			#win.win-show { 
+				opacity: 1;
+			}
+
+			#btn {
+				border-radius: 30px;
+				position: fixed; bottom: 2%; left: 2%;
+				width: 96%; height: 10%;
+				cursor: pointer; 
+				border: 0;
+				background: #F17C58;
+				color: #A12c08;
+				font-size: 24px;
+			}
+			#btn:disabled {
+				opacity: 0.6;
+				filter: grayscale(1);
+			}
+
+		</style>
+
+		<script type="text/javascript" src="easeljs.min.js"></script>
+		<script>
+			'use strict';
+
+			var za = {
+				c:false,
+				nme:false,
+				hrs:false,
+				win:false,
+				btn:false,
+
+				sendstop:function() {
+					console.log('send stop');
+					za.c.send('button-click');
+				},
+
+				ini:function() {
+					za.nme = document.getElementById('name');
+					za.hrs = document.getElementById('horse');
+					za.win = document.getElementById('win');
+					za.btn = document.getElementById('btn');
+
+					za.btn.addEventListener('click',za.sendstop);
+
+					za.c = new WebSocket('ws://jenkins.ar.int:3000'); // 'ws://127.0.0.1:1337');
+		
+					var o = { 'type':'abc','value':null,'error':null }
+
+					za.c.onopen = function() {
+						console.log('opened',za.c);
+						za.c.send('player');
+					};
+
+					za.c.onerror = function(e) {
+						alert(e.message);
+					};
+
+					za.c.onmessage = function(m) {
+						console.log(m.data);
+
+						if(m.data.indexOf('horse')==0) {
+							za.hrs.className = m.data;
+							return;
+						} else {}
+
+						if(m.data.indexOf('button')==0) {
+							za.btn.disabled = (m.data.indexOf('unlock')>0)?false:true;
+							za.btn.className = m.data;
+							return;
+						} else {}
+
+						if(m.data.indexOf('name')==0) {
+							za.nme.innerHTML = m.data.split(':')[1];
+						} else {}
+
+						if(m.data.indexOf('win')==0) {
+							za.win.className = 'win-show';
+						} else {}
+
+					};
+				}
+			};
+			window.addEventListener('load', za.ini);
+
+			var hrs = {
+				img:false,
+				ss:false,
+				sp:false,
+				stage:false,
+
+				cjs:function(e) {
+					hrs.ss = new createjs.SpriteSheet({
+						"images": ["horse.png"], 
+						"frames": [
+							[519,1352,468,225,0,-39.5,-6.05],
+							[525,694,405,225,0,-39.5,-6.05],
+							[402,1577,398,241,0,-37.5,-9.05],
+							[0,1565,402,239,0,-33.5,-8.05],
+							[521,920,430,233,0,-23.5,-14.05],
+							[520,0,465,228,0,-7.5,-22.05],
+							[515,238,479,228,0,-8.5,-24.05],
+							[508,470,500,224,0,-2.5,-26.05],
+							[0,470,508,231,0,-5.5,-20.05],
+							[0,238,515,232,0,-9.5,-17.05],
+							[0,0,520,238,0,-12.5,-11.05],
+							[0,920,521,219,0,-18.5,-11.05],
+							[0,701,525,219,0,-18.5,-11.05],
+							[0,1352,519,213,0,-28.5,-10.05],
+							[0,1139,520,213,0,-28.5,-10.05]
+						],
+						"animations" : {
+							"run": [0,14,"run"]
+						}
+					});
+					hrs.sp = new createjs.Sprite(hrs.ss,"run");
+					hrs.stage.addChild(hrs.sp);
+					// hrs.stage.update();
+					za.ini();
+				},
+				run:function(e) {
+					hrs.stage.update();
+				},
+
+				ini:function() {
+					hrs.stage = new createjs.Stage("horse");
+					createjs.Ticker.addEventListener("tick", hrs.run);
+					hrs.img =  new Image(); hrs.img.src = "horse.png";
+					hrs.img.addEventListener('load',hrs.cjs);
+				}
+			};
+			window.addEventListener('load', hrs.ini);
+
+		</script>
+	</head>
+	<body >
+		<div class="bg" ><span id="name" >#</span><canvas id="horse" width="612" height="280">&#160;</canvas><div id="win" >WIN</div></div>
+		<button id="btn" >ОСТАНОВИТЬ</button>
+	</body>
+</html>

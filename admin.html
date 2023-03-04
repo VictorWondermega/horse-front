@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+	<head>
+		<title>aaa</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,maximum-scale=1"/>
+		
+		<style>
+			body { margin: 0; padding: 0; height: 100%; position: relative; top: 0; left: 0; background: #000; font-family: sans-serif; }
+			.bg {
+				border-radius: 30px;
+				margin: 0; 
+				padding: 0; 
+				width: 96%;
+				height: 84%;
+				overflow: hidden;
+				position: fixed; top: 2%; left: 2%; 
+				background: #FFDC18 linear-gradient(45deg, #E94584, #24AADB, #27DBB1);
+
+				display: flex; flex-direction: row; flex-wrap: wrap;
+				justify-content: center; align-items: baseline;
+			}
+			.player {
+				flex-basis: 20%;
+				border: 1px solid #fff;
+				border-radius: 10px;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-around;
+				margin: 10px;
+				overflow: hidden;
+				padding: 10px;
+			}
+			.player p {
+				visibility: hidden;
+			}
+			.player.hrs p {
+				visibility: visible;
+			}
+			.player.win { 
+				background: red;
+				color: #fff;
+			}
+
+			#btn {
+				border-radius: 30px;
+				position: fixed; bottom: 2%; left: 2%;
+				width: 96%; height: 10%;
+				cursor: pointer; 
+				border: 0;
+				background: #F17C58;
+				color: #A12c08;
+				font-size: 24px;
+			}
+			#btn:disabled {
+				opacity: 0.6;
+				filter: grayscale(1);
+			}
+
+		</style>
+
+		<script>
+			'use strict';
+
+			var za = {
+				c:false,
+				nme:false,
+				hrs:false,
+				win:false,
+				btn:false,
+
+				players:function(nms) {
+					za.bg.innerHTML = '';
+					var tmp = false, ix = nms.length;
+					for(var i = 0; i < ix; i++) {
+						tmp = za.tpls( nms[i] );
+						za.bg.appendChild(tmp);
+					}
+				},
+				playersAdd:function(nm) {
+					var tmp = za.tpls( nm );
+					za.bg.appendChild(tmp);
+				},
+				playersRmv:function(nm) {
+					var tmp = document.getElementById('u'+nm);
+					tmp.parentNode.removeChild(tmp);
+				},
+				playersHrs:function(nm) {
+					var tmp = za.bg.getElementsByTagName('div');
+					for(var i = 0; i < tmp.length; i++) {
+						tmp[i].className = tmp[i].className.replace(' hrs','');
+					}
+					tmp = document.getElementById('u'+nm);
+					tmp.className += ' hrs';
+				},
+				playersWin:function(nm) {
+					var tmp = za.bg.getElementsByTagName('div');
+					for(var i = 0; i < tmp.length; i++) {
+						tmp[i].className = tmp[i].className.replace(' win','');
+					}
+					tmp = document.getElementById('u'+nm);
+					tmp.className += ' win';
+				},
+				tpls:function(num) {
+					var tpl = za.tpl.cloneNode(true); tpl.id = 'u'+num; tpl.style.display = 'block';
+					tpl.getElementsByTagName('span')[0].innerHTML = num;
+				return tpl;
+				},
+
+				startstop:function(e) {
+					if(za.btn.innerHTML == 'СТАРТ') {
+						za.c.send('start');
+						za.btn.innerHTML == 'СТОП';
+					} else {
+						za.c.send('stop');
+						za.btn.innerHTML == 'СТАРТ';
+					}
+				},
+
+				ini:function() {
+					za.bg = document.getElementById('bg');
+					za.nme = document.getElementById('name');
+					za.btn = document.getElementById('btn');
+					za.tpl = document.getElementById('tpl');
+
+					za.btn.addEventListener('click',za.startstop);
+
+					za.c = new WebSocket('ws://jenkins.ar.int:3000'); // 'ws://127.0.0.1:1337');
+
+					za.c.onopen = function() {
+						console.log('opened',za.c);
+						za.c.send('admin');
+					};
+
+					za.c.onerror = function(e) {
+						alert(e.message);
+					};
+
+					za.c.onmessage = function(m) {
+						try {
+							let dt = JSON.parse(m.data);
+							console.log(dt);
+
+							if(dt.event=='players') {
+								za.players(dt.names);
+							} else {}
+
+							if(dt.event=='player-add') {
+								za.playersAdd(dt.name);
+							} else {}
+
+							if(dt.event=='player-remove') {
+								za.playersRmv(dt.name);
+							} else {}
+
+							if(dt.event=='horse') {
+								za.playersHrs(dt.name);
+							} else {}
+
+							if(dt.event=='win') {
+								za.playersWin(dt.name);
+							} else {}
+
+						} catch(e) {
+							console.log(m.data);
+							console.error(e.message);
+						}
+					};
+				}
+			};
+			window.addEventListener('load', za.ini);
+
+		</script>
+	</head>
+	<body >
+		<div id="tpl" class="player" style="display: none;" ><span>#</span><p>лошадь</p><button>остановить</button></div>
+		<div id="bg" class="bg" ></div>
+		<button id="btn" >СТАРТ</button>
+	</body>
+</html>
