@@ -108,8 +108,6 @@
 					za.btn.addEventListener('click',za.sendstop);
 
 					za.c = new WebSocket('ws://jenkins.ar.int:3000'); // 'ws://127.0.0.1:1337');
-		
-					var o = { 'type':'abc','value':null,'error':null }
 
 					za.c.onopen = function() {
 						console.log('opened',za.c);
@@ -147,7 +145,7 @@
 					};
 				}
 			};
-			window.addEventListener('load', za.ini);
+			// window.addEventListener('load', za.ini); // move it to horse loading
 
 			var hrs = {
 				img:false,
@@ -181,7 +179,7 @@
 					});
 					hrs.sp = new createjs.Sprite(hrs.ss,"run");
 					hrs.stage.addChild(hrs.sp);
-					// hrs.stage.update();
+					hrs.stage.update();
 					za.ini();
 				},
 				run:function(e) {
