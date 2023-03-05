@@ -8,12 +8,12 @@
 		<style>
 			body { margin: 0; padding: 0; height: 100%; position: relative; top: 0; left: 0; background: #000; font-family: sans-serif; }
 			.bg {
-				border-radius: 30px;
+				border-radius: 10px;
 				margin: 0; 
 				padding: 0; 
 				width: 96%;
 				height: 84%;
-				overflow: hidden;
+				overflow: auto;
 				position: fixed; top: 2%; left: 2%; 
 				background: #FFDC18 linear-gradient(45deg, #E94584, #24AADB, #27DBB1);
 
@@ -21,7 +21,7 @@
 				justify-content: center; align-items: baseline;
 			}
 			.player {
-				flex-basis: 20%;
+				flex-basis: 80px;
 				border: 1px solid #fff;
 				border-radius: 10px;
 				display: flex;
@@ -61,7 +61,7 @@
 			}
 
 			#btn {
-				border-radius: 30px;
+				border-radius: 10px;
 				position: fixed; bottom: 2%; left: 2%;
 				width: 96%; height: 10%;
 				cursor: pointer; 
@@ -144,7 +144,7 @@
 
 					za.btn.addEventListener('click',za.startstop);
 
-					za.c = new WebSocket('ws://jenkins.ar.int:3000'); // 'ws://127.0.0.1:1337');
+					za.c = new WebSocket('ws://jenkins.ar.int:3000'); //82023.ru:3000'); //jenkins.ar.int:3000'); //127.0.0.1:1337');
 
 					za.c.onopen = function() {
 						console.log('opened',za.c);
