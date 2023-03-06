@@ -97,7 +97,7 @@
 				cur:false, // curent position of horse
 
 				sendstop:function() {
-					console.log('send stop');
+					console.log('button-click:'+za.cur);
 					za.c.send('button-click:'+za.cur);
 				},
 
@@ -109,7 +109,7 @@
 
 					za.btn.addEventListener('click',za.sendstop);
 
-					za.c = new WebSocket('ws://jenkins.ar.int:3000'); //82023.ru:3000'); //jenkins.ar.int:3000'); //127.0.0.1:1337');
+					za.c = new WebSocket('ws://82023.ru:3000'); //jenkins.ar.int:3000'); //127.0.0.1:1337');
 
 					za.c.onopen = function() {
 						console.log('opened',za.c);
