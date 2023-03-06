@@ -45,6 +45,9 @@
 				border: 0; border-radius: 10px; 
 				background: #F17C58;
 			}
+			.player button:disabled {
+				filter: grayscale(1);
+			}
 			.player p {
 				font-weight: bold; 
 				line-height: 2;
@@ -60,7 +63,7 @@
 				color: #fff;
 			}
 
-			#btn {
+			#btn, .btn {
 				border-radius: 10px;
 				position: fixed; bottom: 2%; left: 2%;
 				width: 96%; height: 10%;
@@ -70,7 +73,10 @@
 				color: #A12c08;
 				font-size: 24px;
 			}
-			#btn:disabled {
+			#btn_strt { width: 47%; }
+			#btn_stop { width: 47%; left: 51%; background: #27DBB1; color: #078B61; }
+			
+			#btn:disabled, .btn:disabled {
 				opacity: 0.6;
 				filter: grayscale(1);
 			}
@@ -86,6 +92,9 @@
 				hrs:false,
 				win:false,
 				btn:false,
+				btn_strt:false,
+				btn_stop:false,
+				tpl:false,
 
 				players:function(nms) {
 					za.bg.innerHTML = '';
@@ -119,6 +128,12 @@
 					tmp = document.getElementById('u'+nm);
 					tmp.className += ' win';
 				},
+				playersBtn:function(da) {
+					var tmp = za.bg.getElementsByTagName('div');
+					for(var i = 0; i < tmp.length; i++) {
+						tmp[i].getElementsByTagName('button')[0].disabled = (da == 'lock')?true:false;
+					}
+				},
 				tpls:function(num) {
 					var tpl = za.tpl.cloneNode(true); tpl.id = 'u'+num; tpl.style.display = 'flex';
 					tpl.getElementsByTagName('span')[0].innerHTML = num;
@@ -126,8 +141,11 @@
 				},
 
 				startstop:function(e) {
-					console.log(za.btn.innerHTML);
 					if(za.btn.innerHTML == 'СТАРТ') {
+						var tmp = za.bg.getElementsByTagName('div');
+						for(var i = 0; i < tmp.length; i++) {
+							tmp[i].className = tmp[i].className.replace(' win','');
+						}
 						za.c.send('start');
 						za.btn.innerHTML = 'СТОП';
 					} else {
@@ -135,14 +153,32 @@
 						za.btn.innerHTML = 'СТАРТ';
 					}
 				},
+				strt:function(e) {
+					var tmp = za.bg.getElementsByTagName('div');
+					for(var i = 0; i < tmp.length; i++) {
+						tmp[i].className = tmp[i].className.replace(' win','');
+					}
+					za.c.send('start');
+					za.btn_strt.disabled = true;
+					za.btn_stop.disabled = false;
+				},
+				stop:function(e) {
+					za.c.send('stop');
+					za.btn_strt.disabled = false;
+					za.btn_stop.disabled = true;
+				},
 
 				ini:function() {
 					za.bg = document.getElementById('bg');
 					za.nme = document.getElementById('name');
-					za.btn = document.getElementById('btn');
+					// za.btn = document.getElementById('btn');
+						za.btn_strt = document.getElementById('btn_strt');
+						za.btn_stop = document.getElementById('btn_stop');
+
 					za.tpl = document.getElementById('tpl');
 
-					za.btn.addEventListener('click',za.startstop);
+					za.btn_strt.addEventListener('click',za.strt);
+					za.btn_stop.addEventListener('click',za.stop);
 
 					za.c = new WebSocket('ws://jenkins.ar.int:3000'); //82023.ru:3000'); //jenkins.ar.int:3000'); //127.0.0.1:1337');
 
@@ -180,6 +216,10 @@
 								za.playersWin(dt.name);
 							} else {}
 
+							if(dt.event.indexOf('button')==0) {
+								za.playersBtn(dt.event.split('-')[1]);
+							} else {}
+
 						} catch(e) {
 							console.log(m.data);
 							console.error(e.message);
@@ -194,6 +234,8 @@
 	<body >
 		<div id="tpl" class="player" style="display: none;" ><span>#</span><p>коняшка</p><button>остановить</button></div>
 		<div id="bg" class="bg" ></div>
-		<button id="btn" >СТАРТ</button>
+		<!-- <button id="btn" >СТАРТ</button> //-->
+		<button id="btn_strt" class="btn" >СТАРТ</button>
+		<button id="btn_stop" class="btn" disabled="disabled" >СТОП</button>
 	</body>
 </html>

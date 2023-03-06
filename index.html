@@ -47,7 +47,7 @@
 			}
 
 			#win {
-				position: fixed; top: 50%; left: 50%;
+				position: absolute; top: 50%; left: 50%;
 				transform: translate(-50%,-50%);
 				border-radius: 50%;
 				background: red;
@@ -94,9 +94,11 @@
 				win:false,
 				btn:false,
 
+				cur:false, // curent position of horse
+
 				sendstop:function() {
 					console.log('send stop');
-					za.c.send('button-click');
+					za.c.send('button-click:'+za.cur);
 				},
 
 				ini:function() {
@@ -121,11 +123,15 @@
 					za.c.onmessage = function(m) {
 						console.log(m.data);
 
-						if(m.data.indexOf('horse')==0) {
-							za.hrs.className = m.data;
-							za.win.className = '';
-							return;
-						} else {}
+						if(m.data.indexOf('horse:')==0) {
+							za.cur = m.data.split(':')[1];
+						} else {
+							if(m.data.indexOf('horse')==0) {
+								za.hrs.className = m.data;
+								za.win.className = '';
+								return;
+							} else {}
+						}
 
 						if(m.data.indexOf('button')==0) {
 							za.btn.disabled = (m.data.indexOf('unlock')>0)?false:true;
